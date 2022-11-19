@@ -1,5 +1,8 @@
 # coding=utf-8
+from time import time
+import ipdb
 import torch
+from tqdm import tqdm
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.multiprocessing as mp
@@ -8,14 +11,17 @@ import random
 import numpy as np
 import time
 import logging
-import progressbar
+import sys
+sys.path.append('../../../')
+from model_decoding import SimCTGGPT
+# from simctg.simctggpt import SimCTGGPT
 
 import logging
 logging.getLogger('transformers.generation_utils').disabled = True
 
 def inference_one_instance(args, data, index, eos_token_id, model, cuda_available, device):
     decoding_method = args.decoding_method
-    assert decoding_method in ['greedy', 'beam', 'topk', 'nucleus', 'contrastive']
+    assert decoding_method in ['greedy', 'beam', 'topk', 'nucleus', 'contrastive', 'resistance']
 
     input_ids = data.prefix_token_id_list[index]
     input_ids = torch.LongTensor(input_ids).view(1,-1)
@@ -24,30 +30,46 @@ def inference_one_instance(args, data, index, eos_token_id, model, cuda_availabl
         input_ids = input_ids.cuda(device)
 
     decoding_len = args.decoding_len
-    all_output_text_list = []
+    all_output_time_cost_list, all_output_text_list = [], []
     with torch.no_grad():
         if decoding_method == 'greedy':
+            bt = time.time()
             number_of_instance_to_generate_per_method = 1
             output = model.greedy_search(input_ids=input_ids, decoding_len=decoding_len,
                 end_of_sequence_token_id = eos_token_id, early_stop = True)
+            all_output_time_cost_list.append(time.time() - bt)
             output_text = model.tokenizer.decode(output[prefix_len:])
             all_output_text_list = [output_text]
         elif decoding_method == 'beam':
+            bt = time.time()
             number_of_instance_to_generate_per_method = 1
             output = model.beam_search(input_ids=input_ids, beam_width=4, decoding_len=decoding_len, 
                 end_of_sequence_token_id = eos_token_id, early_stop = True)
+            all_output_time_cost_list.append(time.time() - bt)
             output_text = model.tokenizer.decode(output[prefix_len:])
             all_output_text_list = [output_text]
         elif decoding_method == 'contrastive':
+            bt = time.time()
             number_of_instance_to_generate_per_method = 1
             k, alpha = 5, 0.6
             output = model.fast_contrastive_search(input_ids=input_ids, beam_width=k, alpha=alpha, 
                         decoding_len=decoding_len, end_of_sequence_token_id = eos_token_id, early_stop = True)
+            all_output_time_cost_list.append(time.time() - bt)
+            output_text = model.tokenizer.decode(output[prefix_len:])
+            all_output_text_list = [output_text]
+        elif decoding_method == 'resistance':
+            bt = time.time()
+            number_of_instance_to_generate_per_method = 1
+            k, alpha = 5, 0.2
+            output = model.resistance_decoding(input_ids=input_ids, beam_width=k, alpha=alpha, 
+                        decoding_len=decoding_len, end_of_sequence_token_id = eos_token_id, early_stop = True)
+            all_output_time_cost_list.append(time.time() - bt)
             output_text = model.tokenizer.decode(output[prefix_len:])
             all_output_text_list = [output_text]
         else:
             number_of_instance_to_generate_per_method = args.number_of_instance_to_generate_per_method
             for instance_idx in range(number_of_instance_to_generate_per_method):
+                bt = time.time()
                 if decoding_method == 'topk':
                     output = model.topk_sampling(input_ids=input_ids, topk=50, decoding_len=decoding_len, 
                         end_of_sequence_token_id = eos_token_id, early_stop = True)
@@ -60,6 +82,7 @@ def inference_one_instance(args, data, index, eos_token_id, model, cuda_availabl
                     all_output_text_list.append(output_text)
                 else:
                     raise Exception('Wrong decoding mode!!!')
+                all_output_time_cost_list.append(time.time() - bt)
 
     res_dict = {}
     res_dict['prefix_text'] = data.prefix_text_list[index]
@@ -68,6 +91,7 @@ def inference_one_instance(args, data, index, eos_token_id, model, cuda_availabl
     generated_dict = {}
     for one_idx in range(number_of_instance_to_generate_per_method):
         generated_dict[one_idx] = all_output_text_list[one_idx]
+        generated_dict['time_cost'] = all_output_time_cost_list[one_idx]
     res_dict['generated_result'] = generated_dict
     return res_dict
 
@@ -103,7 +127,6 @@ if __name__ == '__main__':
     print ('Result saving path is {}'.format(save_path))
 
     print ('Loading model...')
-    from simctg.simctggpt import SimCTGGPT
     model_name = 'gpt2-large'
     model = SimCTGGPT(model_name)
     model.eval()
@@ -122,16 +145,12 @@ if __name__ == '__main__':
     print ('Performing inference...')
     data_num = min(1000, len(data.prefix_token_id_list))
     print (data_num)
-    p = progressbar.ProgressBar(data_num)
-    p.start()
     result_list = []
     with torch.no_grad():
-        for index in range(data_num):
-            p.update(index)
+        for index in tqdm(range(data_num)):
             one_res_dict = inference_one_instance(args, data, index, eos_token_id, 
                 model, cuda_available, device)
             result_list.append(one_res_dict)
-    p.finish()
     print ('Inference completed!')
 
     import json
