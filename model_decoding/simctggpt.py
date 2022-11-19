@@ -81,7 +81,7 @@ class SimCTGGPT(nn.Module):
         self.tokenizer.save_pretrained(ckpt_save_path)
 
     @torch.no_grad()
-    def fast_contrastive_search(self, input_ids, beam_width, decoding_len, 
+    def fast_contrastive_search(self, input_ids, beam_width, alpha, decoding_len, 
         end_of_sequence_token_id = None, early_stop = False):
         '''
            input_ids: prefix input; 1 x prefix_len
@@ -98,6 +98,9 @@ class SimCTGGPT(nn.Module):
                 raise Exception('When early_stop is True, end_of_sequence_token_id cannot be None!!!')
 
         self.model.eval()
+        from .utlisgpt import ContrastiveDecodingOneStepFast
+        # sanity check
+        assert alpha >= 0. and alpha <= 1.0
         
         # fast mode
         batch_size, seqlen = input_ids.size()
@@ -107,35 +110,34 @@ class SimCTGGPT(nn.Module):
         past_key_values = None
         last_hidden_states = None
         logits = None
-
-        # make the direct graph with a dict of dict
-        graph = {}
-        for step in tqdm(range(decoding_len)):
-            input_ids, past_key_values, last_hidden_states, logits, graph, label = ContrastiveDecodingOneStepFast(
+        for step in range(decoding_len):
+            input_ids, past_key_values, last_hidden_states, logits = ContrastiveDecodingOneStepFast(
                 self.model,
                 input_ids,
                 beam_width,
+                alpha,
                 past_key_values,
                 last_hidden_states,
+                self.tokenizer,
                 logits,
                 first_step=step == 0,
-                graph=graph,
-                token_list=generated[0],
-                max_length=5
             )
-            running_label.append(label)
             tokens = input_ids.squeeze(dim=-1).tolist()
-            stop_flag = False
             for idx, t in enumerate(tokens):
                 generated[idx].append(t)
-                if early_stop and t == end_of_sequence_token_id:
-                    stop_flag = True
-                    break
-            if stop_flag:
-                break
-        print(f'[!] greedy search rate: {round(1-np.mean(running_label), 4)}')
 
         output = generated[0]
+        if early_stop:
+            tmp = []
+            for idx in range(len(output)):
+                if len(tmp) < prefix_len:
+                    tmp.append(output[idx])
+                else:
+                    if output[idx] != end_of_sequence_token_id:
+                        tmp.append(output[idx])
+                    else:
+                        break
+            output = tmp
         return output
 
     def diverse_contrastive_search(self, input_ids, sample_step, nucleus_p, beam_width, alpha, decoding_len,
@@ -319,7 +321,7 @@ class SimCTGGPT(nn.Module):
         # make the direct graph with a dict of dict
         graph = {}
         running_label = []
-        for step in tqdm(range(decoding_len)):
+        for step in range(decoding_len):
             input_ids, past_key_values, last_hidden_states, graph, label = ResistanceDecodingNGram(
                 self.model,
                 alpha,
@@ -332,15 +334,19 @@ class SimCTGGPT(nn.Module):
                 token_list=generated[0],
                 max_length=5
             )
-            running_label.append(label)
             tokens = input_ids.squeeze(dim=-1).tolist()
-            stop_flag = False
             for idx, t in enumerate(tokens):
                 generated[idx].append(t)
-                if early_stop and t == end_of_sequence_token_id:
-                    stop_flag = True
-                    break
-            if stop_flag:
-                break
         output = generated[0]
+        if early_stop:
+            tmp = []
+            for idx in range(len(output)):
+                if len(tmp) < prefix_len:
+                    tmp.append(output[idx])
+                else:
+                    if output[idx] != end_of_sequence_token_id:
+                        tmp.append(output[idx])
+                    else:
+                        break
+            output = tmp
         return output

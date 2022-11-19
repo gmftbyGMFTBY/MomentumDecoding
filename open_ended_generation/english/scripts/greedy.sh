@@ -1,4 +1,4 @@
-CUDA_VISIBLE_DEVICES=1 python ../inference.py\
+CUDA_VISIBLE_DEVICES=0 python ../inference.py\
     --model_name gpt2-large\
     --data_path ../../../data/webtext/webtext.test.jsonl\
     --decoding_method greedy\
