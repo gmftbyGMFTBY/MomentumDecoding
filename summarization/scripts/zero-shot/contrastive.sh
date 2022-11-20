@@ -1,4 +1,4 @@
-CUDA_VISIBLE_DEVICES=1 python ../../inference.py\
+CUDA_VISIBLE_DEVICES=0 python ../../inference.py\
     --dataset_path_prefix ../../../data/xsum/\
     --save_path_prefix ../../inference_results/\
     --decoding_len 128\

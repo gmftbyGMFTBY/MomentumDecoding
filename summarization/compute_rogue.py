@@ -67,5 +67,5 @@ def compute_rogue_scores(prediction_list, reference_list):
     # remove the local tmp directory
     os.system(r'rm -r ./tmp/')
     # remove the global tmp directory
-    remove_tmp_files()
+    # remove_tmp_files()
     return rogue_1_score, rogue_2_score, rogue_l_score

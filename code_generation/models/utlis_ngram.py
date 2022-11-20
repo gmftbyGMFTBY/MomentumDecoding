@@ -22,29 +22,13 @@ def ResistanceDecodingNGram(
     graph={},
     token_list=None,
     max_length=5,
-    opt=False,
-    seqlen=-1
     ):
-    if opt:
-        if first_step:
-            attention_mask = torch.ones_like(ids)
-        else:
-            attention_mask = torch.ones((1, seqlen)).to(ids.device)
-        output = model(
-            input_ids=ids, 
-            attention_mask=attention_mask,
-            past_key_values=past_key_values,
-            use_cache=True,
-            output_hidden_states=True
-        )
-    else:
-        output = model(
-            input_ids=ids, 
-            past_key_values=past_key_values,
-            use_cache=True,
-            output_hidden_states=True
-        )
-
+    output = model(
+        input_ids=ids, 
+        past_key_values=past_key_values,
+        use_cache=True,
+        output_hidden_states=True
+    )
     past_key_values = output.past_key_values
     last_hidden_states = output.hidden_states[-1]    # [B, S, E]
     logit = output.logits[:, -1]

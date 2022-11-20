@@ -91,8 +91,8 @@ def inference_one_instance(args, data, index, eos_token_id, model, cuda_availabl
     generated_dict = {}
     for one_idx in range(number_of_instance_to_generate_per_method):
         generated_dict[one_idx] = all_output_text_list[one_idx]
-        generated_dict['time_cost'] = all_output_time_cost_list[one_idx]
     res_dict['generated_result'] = generated_dict
+    res_dict['time_cost'] = all_output_time_cost_list
     return res_dict
 
 def parse_config():

@@ -1,4 +1,5 @@
 import json
+import ipdb
 import torch
 import argparse
 import numpy as np
@@ -14,7 +15,8 @@ def load_result(in_f):
         reference_list.append(one_reference_text)
 
     # load all predictions
-    number_of_predictions_per_instance = len(result_list[0]['generated_result'])
+    # number_of_predictions_per_instance = len(result_list[0]['generated_result'])
+    number_of_predictions_per_instance = 1
     print ('Number of predictions per instance is {}'.format(number_of_predictions_per_instance))
     all_prediction_list = []
     for idx in range(number_of_predictions_per_instance):

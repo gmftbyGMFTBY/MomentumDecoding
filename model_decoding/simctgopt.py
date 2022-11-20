@@ -16,12 +16,12 @@ import pandas as pd
 from .utlis_ngram import *
 
 val_fct = CrossEntropyLoss(reduction='none')
-class SimCTGCodeGen(nn.Module):
+class SimCTGOPT(nn.Module):
     def __init__(self, model_name, special_token_list=[]):
-        super(SimCTGCodeGen, self).__init__()
-        from transformers import AutoTokenizer, AutoModelForCausalLM
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForCausalLM.from_pretrained(model_name)
+        super(SimCTGOPT, self).__init__()
+        from transformers import GPT2Tokenizer, OPTForCausalLM
+        self.tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+        self.model = OPTForCausalLM.from_pretrained(model_name)
         if len(special_token_list) > 0:
             print ('Original vocabulary size is {}'.format(len(self.tokenizer)))
             print ('Adding special tokens...')
@@ -30,7 +30,7 @@ class SimCTGCodeGen(nn.Module):
             print ('Resizing language model embeddings...')
             self.model.resize_token_embeddings(len(self.tokenizer))
             print ('Language model embeddings resized.')
-        self.vocab_size = len(self.tokenizer)
+        self.vocab_size = self.model.config.vocab_size
         print ('The vocabulary size of the language model is {}'.format(len(self.tokenizer)))
         self.embed_dim = self.model.config.hidden_size
 
@@ -79,8 +79,14 @@ class SimCTGCodeGen(nn.Module):
     # decoding functions
     # ------------------------------------------------------- #
     @torch.no_grad()
-    def fast_contrastive_search(self, input_ids, beam_width, alpha, decoding_len, 
-        end_of_sequence_token_id = None, early_stop = False):
+    def fast_contrastive_search(self, 
+        input_ids, 
+        beam_width, 
+        alpha, 
+        decoding_len, 
+        end_of_sequence_token_id = None, 
+        early_stop = False,
+        block_context_degeneration_penalty=False):
         '''
            input_ids: prefix input; 1 x prefix_len
            decoding_len: how many tokens to generate
@@ -96,19 +102,28 @@ class SimCTGCodeGen(nn.Module):
                 raise Exception('When early_stop is True, end_of_sequence_token_id cannot be None!!!')
 
         self.model.eval()
-        from .utliscodegen import ContrastiveDecodingOneStepFast
+        from .utlisopt import ContrastiveDecodingOneStepFast
         # sanity check
         assert alpha >= 0. and alpha <= 1.0
         
         # fast mode
         batch_size, seqlen = input_ids.size()
         prefix_len = seqlen
+
+        if block_context_degeneration_penalty:
+            block_context_span = prefix_len
+        else:
+            block_context_span = 0
+
         #generated = [[] for _ in range(batch_size)]
         generated = [item for item in input_ids.tolist()]
         past_key_values = None
         last_hidden_states = None
         logits = None
+        stop_flag = False
         for step in range(decoding_len):
+            if stop_flag:
+                break
             input_ids, past_key_values, last_hidden_states, logits = ContrastiveDecodingOneStepFast(
                 self.model,
                 input_ids,
@@ -119,27 +134,24 @@ class SimCTGCodeGen(nn.Module):
                 self.tokenizer,
                 logits,
                 first_step=step == 0,
+                block_context_degeneration_penalty=block_context_degeneration_penalty,
+                block_context_span=block_context_span
             )
             tokens = input_ids.squeeze(dim=-1).tolist()
             for idx, t in enumerate(tokens):
-                generated[idx].append(t)
-
-        output = generated[0]
-        if early_stop:
-            tmp = []
-            for idx in range(len(output)):
-                if len(tmp) < prefix_len:
-                    tmp.append(output[idx])
-                else:
-                    if output[idx] != end_of_sequence_token_id:
-                        tmp.append(output[idx])
-                    else:
+                if early_stop:
+                    if t == end_of_sequence_token_id:
+                        stop_flag = True
                         break
-            output = tmp
+                    else:
+                        generated[idx].append(t)
+                else:
+                    generated[idx].append(t)
+        output = generated[0]
         return output
 
     def diverse_contrastive_search(self, input_ids, sample_step, nucleus_p, beam_width, alpha, decoding_len,
-        end_of_sequence_token_id = None, early_stop = False):
+        end_of_sequence_token_id = None, early_stop = False, block_context_degeneration_penalty=False):
         '''
             sample_step: 
                 number of steps to decode with nucleus sampling, 
@@ -168,18 +180,9 @@ class SimCTGCodeGen(nn.Module):
                             top_p=nucleus_p,
                             top_k=0)
         # then do contrastive search
-        output = self.fast_contrastive_search(input_ids, beam_width, alpha, contrastive_step)
-        if early_stop:
-            tmp = []
-            for idx in range(len(output)):
-                if len(tmp) < prefix_len:
-                    tmp.append(output[idx])
-                else:
-                    if output[idx] != end_of_sequence_token_id:
-                        tmp.append(output[idx])
-                    else:
-                        break
-            output = tmp
+        output = self.fast_contrastive_search(input_ids, beam_width, alpha, contrastive_step,
+            end_of_sequence_token_id = end_of_sequence_token_id, early_stop = early_stop,
+            block_context_degeneration_penalty=block_context_degeneration_penalty)
         return output
 
     def greedy_search(self, input_ids, decoding_len, end_of_sequence_token_id = None, early_stop = False, speedup=True):
@@ -249,8 +252,9 @@ class SimCTGCodeGen(nn.Module):
                             do_sample=True, 
                             max_length=prefix_len+decoding_len, 
                             top_p=nucleus_p,
+                            use_cache=use_cache,
                             top_k=0,
-                            use_cache=use_cache)
+                   )
         output = output[0]
         if early_stop:
             tmp = []
@@ -333,7 +337,9 @@ class SimCTGCodeGen(nn.Module):
                 first_step=step == 0,
                 graph=graph,
                 token_list=generated[0],
-                max_length=5
+                max_length=5,
+                opt=True,
+                seqlen=len(generated[0])
             )
             tokens = input_ids.squeeze(dim=-1).tolist()
             for idx, t in enumerate(tokens):

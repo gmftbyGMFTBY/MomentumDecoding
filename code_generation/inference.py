@@ -10,6 +10,9 @@ import numpy as np
 import time
 import logging
 import progressbar
+import sys
+sys.path.append('../../..')
+from models.simctgcodegen import SimCTGCodeGen
 
 import logging
 logging.getLogger('transformers.generation_utils').disabled = True
@@ -22,7 +25,7 @@ def parse_output(output, prefix_len, tokenizer):
 
 def generate_one_instance(args, test_item, model, tokenizer, cuda_available, device):
     evaluation_method = args.evaluation_method
-    assert evaluation_method in ['beam', 'nucleus', 'contrastive']
+    assert evaluation_method in ['beam', 'nucleus', 'contrastive', 'resistance', 'greedy']
 
     input_ids = test_item['prompt_ids']
     _, prefix_len = input_ids.size()
@@ -36,6 +39,10 @@ def generate_one_instance(args, test_item, model, tokenizer, cuda_available, dev
                 early_stopping=False, eos_token_id=-1,
                 num_beams=5)[0]
             output = output.detach().cpu()
+        elif evaluation_method == 'greedy':
+            output = model.model.generate(input_ids=input_ids, max_length=prefix_len+decoding_len, 
+                early_stopping=False, eos_token_id=-1)[0]
+            output = output.detach().cpu()
         elif evaluation_method == 'nucleus':
             output = model.model.generate(input_ids=input_ids, max_length=prefix_len+decoding_len, 
                 early_stopping=False, eos_token_id=-1,
@@ -47,7 +54,13 @@ def generate_one_instance(args, test_item, model, tokenizer, cuda_available, dev
             k, alpha = 3, 0.4
             output = model.fast_contrastive_search(input_ids=input_ids, beam_width=k, 
                                            alpha=alpha, decoding_len=decoding_len) 
-            #output = output.detach().cpu()
+            # output = output.detach().cpu()
+        elif evaluation_method == 'resistance':
+            number_of_instance_to_generate_per_method = 1
+            k, alpha = 3, 0.05
+            output = model.resistance_decoding(input_ids=input_ids, beam_width=k, alpha=alpha, 
+                        decoding_len=decoding_len, early_stop = False)
+            # output = output.detach().cpu()
         else:
             raise Exception('Wrong evaluation mode!!!')
 
@@ -91,7 +104,6 @@ if __name__ == '__main__':
     device = torch.device('cuda')
 
     print ('Loading model...')
-    from models.simctgcodegen import SimCTGCodeGen
     model = SimCTGCodeGen(args.model_name)
     codegen_name = args.model_name[11:]
     print ('CodeGen model name is {}'.format(codegen_name))

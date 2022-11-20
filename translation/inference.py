@@ -1,4 +1,6 @@
 # coding=utf-8
+from tqdm import tqdm
+import ipdb
 import json
 import torch
 import torch.nn as nn
@@ -10,6 +12,10 @@ import numpy as np
 import time
 import logging
 import progressbar
+import sys
+sys.path.append('../../')
+from model_decoding import SimCTGOPT
+# from simctg.simctgopt import SimCTGOPT
 
 import logging
 logging.getLogger('transformers.generation_utils').disabled = True
@@ -47,6 +53,11 @@ def inference_one_instance(args, data, index, model, tokenizer, bos_token_id, eo
             output = model.fast_contrastive_search(input_ids=input_ids, beam_width=k, alpha=alpha, 
                 decoding_len=decoding_len, end_of_sequence_token_id = eos_token_id, early_stop = True, 
                 block_context_degeneration_penalty=False) 
+        elif decoding_method == 'resistance':
+            k, alpha = 3, 0.2
+            output = model.resistance_decoding(input_ids=input_ids, beam_width=k, alpha=alpha, 
+                decoding_len=decoding_len, end_of_sequence_token_id = eos_token_id, early_stop = True, 
+            ) 
         else:
             raise Exception('Wrong Decoding Method!')
 
@@ -104,7 +115,6 @@ if __name__ == '__main__':
     bos_token_id = tokenizer.bos_token_id
     eos_token_id = tokenizer.convert_tokens_to_ids(['Ċ'])[0] # 'Ċ' stands for '\n'
     # load model
-    from simctg.simctgopt import SimCTGOPT
     model = SimCTGOPT(args.model_name)
     if cuda_available:
         model = model.to(device)
@@ -137,17 +147,13 @@ if __name__ == '__main__':
 
     print ('Performing inference...')
     data_num = len(data.reference_list)
-    p = progressbar.ProgressBar(data_num)
-    p.start()
     result_list = []
     with torch.no_grad():
-        for index in range(data_num):
-            p.update(index)
+        for index in tqdm(range(data_num)):
             with torch.no_grad():
                 one_res_dict = inference_one_instance(args, data, index, model, tokenizer, 
                     bos_token_id, eos_token_id, cuda_available, device)
             result_list.append(one_res_dict)
-    p.finish()
     print ('Inference completed!')
 
     print ('Saving inference result...')
