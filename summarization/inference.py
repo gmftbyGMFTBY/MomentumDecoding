@@ -47,6 +47,9 @@ def inference_one_instance(args, data, index, model, tokenizer, bos_token_id, eo
             beam_width = 4
             output  = model.beam_search(input_ids=input_ids, decoding_len=decoding_len,
                 beam_width = beam_width, end_of_sequence_token_id = eos_token_id, early_stop = True) 
+        elif decoding_method == 'greedy':
+            output  = model.greedy_search(input_ids=input_ids, decoding_len=decoding_len,
+                end_of_sequence_token_id = eos_token_id, early_stop = True) 
         elif decoding_method == 'nucleus':
             output  = model.nucleus_sampling(input_ids=input_ids, nucleus_p=0.95, 
                 decoding_len=decoding_len, end_of_sequence_token_id = eos_token_id, early_stop = True) 
@@ -57,7 +60,7 @@ def inference_one_instance(args, data, index, model, tokenizer, bos_token_id, eo
                 decoding_len=decoding_len, end_of_sequence_token_id = eos_token_id, early_stop = True, 
                 block_context_degeneration_penalty=block_context_degeneration_penalty) 
         elif decoding_method == 'resistance':
-            k, alpha = 5, 0.2
+            k, alpha = 5, 0.1
             output = model.resistance_decoding(input_ids=input_ids, beam_width=k, alpha=alpha, 
                 decoding_len=decoding_len, end_of_sequence_token_id = eos_token_id, early_stop = True) 
         else:

@@ -1,4 +1,5 @@
 import random
+import ipdb
 import torch
 import numpy as np
 import progressbar
@@ -41,9 +42,8 @@ class Data:
     def process_one_text(self, text, prefix_token_id_list, prefix_text_list, reference_text_list):
         tokens = self.tokenizer.tokenize(text)
         total_len = self.prefix_len + self.decoding_len
-        if len(tokens) < total_len:
-            return
-
+        # if len(tokens) < total_len:
+        #     return
         token_id_list = self.tokenizer.convert_tokens_to_ids(tokens)
         prefix_id_list = token_id_list[:self.prefix_len]
         prefix_token_id_list.append(prefix_id_list)

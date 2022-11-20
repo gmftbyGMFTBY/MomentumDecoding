@@ -54,7 +54,7 @@ def inference_one_instance(args, data, index, model, tokenizer, bos_token_id, eo
                 decoding_len=decoding_len, end_of_sequence_token_id = eos_token_id, early_stop = True, 
                 block_context_degeneration_penalty=False) 
         elif decoding_method == 'resistance':
-            k, alpha = 3, 0.2
+            k, alpha = 3, 0.1
             output = model.resistance_decoding(input_ids=input_ids, beam_width=k, alpha=alpha, 
                 decoding_len=decoding_len, end_of_sequence_token_id = eos_token_id, early_stop = True, 
             ) 

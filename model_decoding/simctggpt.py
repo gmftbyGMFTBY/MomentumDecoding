@@ -266,7 +266,7 @@ class SimCTGGPT(nn.Module):
             output = tmp
         return output
 
-    def topk_sampling(self, input_ids, topk, decoding_len, end_of_sequence_token_id = None, early_stop = False):
+    def topk_sampling(self, input_ids, topk, decoding_len, end_of_sequence_token_id = None, early_stop = False, speedup=True):
         if early_stop:
             try:
                 assert end_of_sequence_token_id != None
@@ -274,12 +274,14 @@ class SimCTGGPT(nn.Module):
                 raise Exception('When early_stop is True, end_of_sequence_token_id cannot be None!!!')
 
         _, prefix_len = input_ids.size()
+        use_cache = True if speedup else False
         output = self.model.generate(
                             input_ids, 
                             do_sample=True, 
                             max_length=prefix_len+decoding_len, 
                             top_p=1.0,
-                            top_k=topk)
+                            top_k=topk,
+                            use_cache=use_cache)
         output = output[0]
         if early_stop:
             tmp = []
@@ -337,6 +339,8 @@ class SimCTGGPT(nn.Module):
             tokens = input_ids.squeeze(dim=-1).tolist()
             for idx, t in enumerate(tokens):
                 generated[idx].append(t)
+            if generated[0][-1] == end_of_sequence_token_id:
+                break
         output = generated[0]
         if early_stop:
             tmp = []

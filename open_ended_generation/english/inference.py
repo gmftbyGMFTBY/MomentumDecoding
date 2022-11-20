@@ -100,6 +100,7 @@ def parse_config():
     # model and data configuration
     parser.add_argument("--model_name", type=str)
     parser.add_argument("--data_path", type=str)
+    parser.add_argument("--data_name", type=str)
     # decoding configuration
     parser.add_argument("--decoding_method", type=str)
     parser.add_argument("--prefix_len", type=int)
@@ -116,7 +117,7 @@ if __name__ == '__main__':
     args = parse_config()
     device = torch.device('cuda')
 
-    save_path_prefix = args.save_path_prefix + '{}/{}/'.format(args.model_name, args.decoding_method)
+    save_path_prefix = args.save_path_prefix + '{}/{}/{}/'.format(args.model_name, args.data_name, args.decoding_method)
     import os
     if os.path.exists(save_path_prefix):
         pass
@@ -127,8 +128,7 @@ if __name__ == '__main__':
     print ('Result saving path is {}'.format(save_path))
 
     print ('Loading model...')
-    model_name = 'gpt2-large'
-    model = SimCTGGPT(model_name)
+    model = SimCTGGPT(args.model_name)
     model.eval()
     tokenizer = model.tokenizer
     eos_token_id = tokenizer.eos_token_id
@@ -143,7 +143,7 @@ if __name__ == '__main__':
     print ('Data loaded.')
 
     print ('Performing inference...')
-    data_num = min(1000, len(data.prefix_token_id_list))
+    data_num = len(data.prefix_token_id_list)
     print (data_num)
     result_list = []
     with torch.no_grad():
