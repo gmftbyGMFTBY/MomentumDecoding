@@ -1,4 +1,5 @@
 import json
+import ipdb
 import torch
 import mauve 
 import argparse
@@ -13,11 +14,14 @@ def parse_text(reference_text, prediction_text, tokenizer):
     reference_tokens = tokenizer.tokenize(reference_text)
     prediction_tokens = tokenizer.tokenize(prediction_text)
     min_len = min(len(reference_tokens), len(prediction_tokens))
-    reference_tokens = reference_tokens[:min_len]
+    reference_tokens = reference_tokens[:128]
     reference_text = decode(reference_tokens, tokenizer)
-    prediction_tokens = prediction_tokens[:min_len]
+    prediction_tokens = prediction_tokens[:128]
     prediction_text = decode(prediction_tokens, tokenizer)
-    return reference_text, prediction_text
+
+    if min(len(reference_tokens), len(prediction_tokens)) == 128:
+        return reference_text, prediction_text
+    return None, None
 
 def load_result(in_f, tokenizer):
     with open(in_f) as f:
@@ -49,12 +53,11 @@ def evaluate_one_instance(reference_list, prediction_list, tokenizer):
     for idx in range(data_num):
         one_ref, one_pred = reference_list[idx], prediction_list[idx]
         one_ref, one_pred = parse_text(one_ref, one_pred, tokenizer)
-        if len(one_pred.strip()) > 0: # igore predictions with zero length
+        if one_ref and one_pred and len(one_pred.strip()) > 0: # igore predictions with zero length
             ref_list.append(one_ref)
             pred_list.append(one_pred)
 
-    out =  mauve.compute_mauve(p_text=ref_list, q_text=pred_list, device_id=0, 
-            max_text_length=200, verbose=False)
+    out =  mauve.compute_mauve(p_text=ref_list, q_text=pred_list, device_id=0, verbose=False, featurize_model_name='gpt2')
     mauve_score = out.mauve
     return mauve_score*100
 

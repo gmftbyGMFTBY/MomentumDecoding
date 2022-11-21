@@ -1,5 +1,18 @@
 CUDA_VISIBLE_DEVICES=7 python ../inference.py\
     --model_name gpt2-xl\
+    --data_path ../../../data/human_annotations/human.jsonl\
+    --data_name human_annotations\
+    --decoding_method resistance\
+    --prefix_len 32\
+    --decoding_len 256\
+    --save_path_prefix ../inference_results/
+
+exit
+
+
+
+CUDA_VISIBLE_DEVICES=7 python ../inference.py\
+    --model_name gpt2-xl\
     --data_path ../../../data/wikinews/wikinews.jsonl\
     --data_name wikinews\
     --decoding_method resistance\
