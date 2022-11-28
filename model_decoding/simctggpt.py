@@ -298,7 +298,7 @@ class SimCTGGPT(nn.Module):
 
     @torch.no_grad()
     def resistance_decoding(self, input_ids, beam_width, decoding_len, alpha=0.2,
-        end_of_sequence_token_id = None, early_stop = False):
+        end_of_sequence_token_id = None, early_stop = False, resistance_function=None):
         '''
            input_ids: prefix input; 1 x prefix_len
            decoding_len: how many tokens to generate
@@ -312,6 +312,18 @@ class SimCTGGPT(nn.Module):
                 assert end_of_sequence_token_id != None
             except AssertionError:
                 raise Exception('When early_stop is True, end_of_sequence_token_id cannot be None!!!')
+
+        if resistance_function == 'ours':
+            ngram_lookup_table = ngram_lookup_table_ours
+        elif resistance_function == 'constant':
+            ngram_lookup_table = ngram_lookup_table_constant
+        elif resistance_function == 'log':
+            ngram_lookup_table = ngram_lookup_table_log
+        elif resistance_function == 'exp':
+            ngram_lookup_table = ngram_lookup_table_exp
+        else:
+            raise Exception(f"[!] Unknown resistance function: {resistance_function}")
+
 
         self.model.eval()
         batch_size, seqlen = input_ids.size()
@@ -334,7 +346,8 @@ class SimCTGGPT(nn.Module):
                 first_step=step == 0,
                 graph=graph,
                 token_list=generated[0],
-                max_length=5
+                max_length=5,
+                ngram_lookup_table=ngram_lookup_table
             )
             tokens = input_ids.squeeze(dim=-1).tolist()
             for idx, t in enumerate(tokens):
@@ -354,3 +367,65 @@ class SimCTGGPT(nn.Module):
                         break
             output = tmp
         return output
+
+    def detailed_greedy_search(self, input_ids, decoding_len, end_of_sequence_token_id = None, early_stop = False, speedup=True):
+        if early_stop:
+            try:
+                assert end_of_sequence_token_id != None
+            except AssertionError:
+                raise Exception('When early_stop is True, end_of_sequence_token_id cannot be None!!!')
+
+        _, prefix_len = input_ids.size()
+        generated = []
+        ids = input_ids.clone()
+        graph = {}
+
+        # init the directed graph
+        token_list = input_ids[0].tolist()
+        for i in range(len(token_list)):
+            node = token_list[i]
+            if node not in graph:
+                graph[node] = {
+                    'next_neighbors': set(),
+                    'indexes': [i]
+                }
+            if i > 0:
+                last_node = token_list[i-1]
+                graph[last_node]['next_neighbors'].add(node)
+        last_node = token_list[-1]
+        activate = False
+        activate_results = []
+        past_key_values = None
+        for _ in range(decoding_len):
+            output = self.model(input_ids=ids, past_key_values=past_key_values, use_cache=True)
+            past_key_values = output['past_key_values']
+            next_token_logits = output['logits'][-1, -1, :]
+            next_token_prob, next_token = next_token_logits.max(dim=-1)
+            if next_token.item() == end_of_sequence_token_id:
+                break
+
+            if next_token.item() in graph and len(graph[next_token.item()]['indexes']) == 1:
+                activate = True
+                activate_results.append(next_token_prob.item())
+            else:
+                activate = False
+                activate_results = []
+            if activate and next_token.item() in graph and len(graph[next_token.item()]['indexes']) == 2 and len(activate_results) > 0:
+                # degeneration are make
+                ipdb.set_trace()
+                break
+
+            generated.append((next_token.item(), next_token_prob.item()))
+            if next_token.item() not in graph:
+                graph[next_token.item()] = {
+                    'next_neighbors' : set(),
+                    'indexes': [len(token_list)]
+                }
+            else:
+                graph[next_token.item()]['indexes'].append(len(token_list))
+            graph[last_node]['next_neighbors'].add(next_token.item())
+            last_node = next_token.item()
+            ids = next_token.view(1, 1)
+        return [a for a, b in generated], np.mean(activate_results)
+
+

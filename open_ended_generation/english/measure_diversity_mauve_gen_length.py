@@ -23,14 +23,14 @@ if __name__ == '__main__':
 
     print ('Measuring MAUVE...')
     from utlis.compute_mauve import measure_mauve
-    mauve_dict = measure_mauve(args.test_path)
-    print (mauve_dict)
-    print ('MAUVE measurement completed!')
+    # mauve_dict = measure_mauve(args.test_path)
+    # print (mauve_dict)
+    # print ('MAUVE measurement completed!')
 
     result_dict = {
         'diversity_dict': diversity_dict,
         'gen_length_dict': gen_length_dict,
-        'mauve_dict': mauve_dict
+        # 'mauve_dict': mauve_dict
     }
     
     import json

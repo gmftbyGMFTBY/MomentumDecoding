@@ -10,6 +10,23 @@ import random
 import numpy as np
 import argparse
 import random
+from math import *
+
+
+def ngram_lookup_table_ours(rep_len, mapping=None):
+    if mapping is None:
+        mapping = {
+            0: 0.0,
+            1: 1.0,    # no rersistance
+            2: 3.0,
+            3: 4.0,
+            4: 5.0,
+            5: 6.0,
+        }
+    if rep_len in mapping:
+        return mapping[rep_len]
+    else:
+        return np.inf
 
 def ResistanceDecodingNGram(
     model, 
@@ -23,7 +40,8 @@ def ResistanceDecodingNGram(
     token_list=None,
     max_length=5,
     opt=False,
-    seqlen=-1
+    seqlen=-1,
+    ngram_lookup_table=ngram_lookup_table_ours,
     ):
     if opt:
         if first_step:
@@ -96,21 +114,33 @@ def ResistanceDecodingNGram(
     graph[last_node]['next_neighbors'].add(next_id.item())
     return next_id, past_key_values, last_hidden_states, graph, is_greedy
 
+def ngram_lookup_table_log(rep_len, mapping=None):
+    if rep_len == 0:
+        return 0
+    # avoid alpha=0.2
+    return log(1+rep_len, 6)/0.2
 
-def ngram_lookup_table(rep_len, mapping=None):
+def ngram_lookup_table_exp(rep_len, mapping=None):
+    if rep_len == 0:
+        return 0
+    # avoid alpha=0.2
+    return 1.5**rep_len/2
+
+def ngram_lookup_table_constant(rep_len, mapping=None):
     if mapping is None:
         mapping = {
             0: 0.0,
-            1: 1.0,    # no rersistance
-            2: 3.0,
-            3: 4.0,
-            4: 5.0,
-            5: 6.0,
+            1: 2.0,    # no rersistance
+            2: 2.0,
+            3: 2.0,
+            4: 2.0,
+            5: 2.0,
         }
     if rep_len in mapping:
         return mapping[rep_len]
     else:
-        return np.inf
+        return 2
+
 
 def find_max_repetition_length(graph, token_list, candidate, max_length=5):
     '''candidate must in the graph; generate it will lead to at least a circuit;

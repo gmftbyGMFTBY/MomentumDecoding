@@ -51,7 +51,8 @@ def inference_one_instance(args, data, index, eos_token_id, model, cuda_availabl
         elif decoding_method == 'contrastive':
             bt = time.time()
             number_of_instance_to_generate_per_method = 1
-            k, alpha = 5, 0.6
+            # k, alpha = 5, 0.6
+            k, alpha = args.topk, 0.6
             output = model.fast_contrastive_search(input_ids=input_ids, beam_width=k, alpha=alpha, 
                         decoding_len=decoding_len, end_of_sequence_token_id = eos_token_id, early_stop = True)
             all_output_time_cost_list.append(time.time() - bt)
@@ -60,9 +61,9 @@ def inference_one_instance(args, data, index, eos_token_id, model, cuda_availabl
         elif decoding_method == 'resistance':
             bt = time.time()
             number_of_instance_to_generate_per_method = 1
-            k, alpha = 5, 0.2
+            k, alpha = args.topk, 0.2
             output = model.resistance_decoding(input_ids=input_ids, beam_width=k, alpha=alpha, 
-                        decoding_len=decoding_len, end_of_sequence_token_id = eos_token_id, early_stop = True)
+                        decoding_len=decoding_len, end_of_sequence_token_id = eos_token_id, early_stop = True, resistance_function=args.resistance_function)
             all_output_time_cost_list.append(time.time() - bt)
             output_text = model.tokenizer.decode(output[prefix_len:])
             all_output_text_list = [output_text]
@@ -71,12 +72,12 @@ def inference_one_instance(args, data, index, eos_token_id, model, cuda_availabl
             for instance_idx in range(number_of_instance_to_generate_per_method):
                 bt = time.time()
                 if decoding_method == 'topk':
-                    output = model.topk_sampling(input_ids=input_ids, topk=50, decoding_len=decoding_len, 
+                    output = model.topk_sampling(input_ids=input_ids, topk=args.topk, decoding_len=decoding_len, 
                         end_of_sequence_token_id = eos_token_id, early_stop = True)
                     output_text = model.tokenizer.decode(output[prefix_len:])
                     all_output_text_list.append(output_text)
                 elif decoding_method == 'nucleus':
-                    output = model.nucleus_sampling(input_ids=input_ids, nucleus_p=0.95, decoding_len=decoding_len, 
+                    output = model.nucleus_sampling(input_ids=input_ids, nucleus_p=args.topp, decoding_len=decoding_len, 
                         end_of_sequence_token_id = eos_token_id, early_stop = True)
                     output_text = model.tokenizer.decode(output[prefix_len:])
                     all_output_text_list.append(output_text)
@@ -108,6 +109,9 @@ def parse_config():
     parser.add_argument("--number_of_instance_to_generate_per_method", type=int, default=1)
     # save configuration
     parser.add_argument("--save_path_prefix", type=str)
+    parser.add_argument("--resistance_function", type=str)
+    parser.add_argument("--topk", type=int)
+    parser.add_argument("--topp", type=float)
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -123,7 +127,14 @@ if __name__ == '__main__':
         pass
     else: # recursively construct directory
         os.makedirs(save_path_prefix, exist_ok=True)
-    save_name = '{}_result.json'.format(args.decoding_method)
+    # save_name = '{}_result_{}.json'.format(args.decoding_method, args.resistance_function)
+    if args.decoding_method in ['contrastive', 'resistance', 'topk']:
+        save_name = '{}_result_{}.json'.format(args.decoding_method, args.topk)
+    elif args.decoding_method in ['nucleus']:
+        save_name = '{}_result_{}.json'.format(args.decoding_method, args.topp)
+    else:
+        save_name = '{}_result.json'.format(args.decoding_method)
+    print(f'[!] save name is: {save_name}')
     save_path = save_path_prefix + save_name
     print ('Result saving path is {}'.format(save_path))
 
