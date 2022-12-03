@@ -1,5 +1,5 @@
 CUDA_VISIBLE_DEVICES=6 python ../compute_greedy_ratio.py \
-    --data_path ../../../data/story/story.jsonl\
+    --data_path ../../../data/wikitext/wikitext.jsonl\
     --model_name gpt2-xl\
-    --data_name story\
-    --decoding_method resistance
+    --data_name wikitext\
+    --decoding_method greedy

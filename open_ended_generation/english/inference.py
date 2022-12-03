@@ -62,7 +62,7 @@ def inference_one_instance(args, data, index, eos_token_id, model, cuda_availabl
             bt = time.time()
             number_of_instance_to_generate_per_method = 1
             k, alpha = args.topk, 0.2
-            output = model.resistance_decoding(input_ids=input_ids, beam_width=k, alpha=alpha, 
+            output, running_label = model.resistance_decoding(input_ids=input_ids, beam_width=k, alpha=alpha, 
                         decoding_len=decoding_len, end_of_sequence_token_id = eos_token_id, early_stop = True, resistance_function=args.resistance_function)
             all_output_time_cost_list.append(time.time() - bt)
             output_text = model.tokenizer.decode(output[prefix_len:])
@@ -130,6 +130,7 @@ if __name__ == '__main__':
     # save_name = '{}_result_{}.json'.format(args.decoding_method, args.resistance_function)
     if args.decoding_method in ['contrastive', 'resistance', 'topk']:
         save_name = '{}_result_{}.json'.format(args.decoding_method, args.topk)
+        # save_name = '{}_result.json'.format(args.decoding_method)
     elif args.decoding_method in ['nucleus']:
         save_name = '{}_result_{}.json'.format(args.decoding_method, args.topp)
     else:

@@ -1,3 +1,8 @@
+CUDA_VISIBLE_DEVICES=1 python ../compute_coherence.py\
+    --opt_model_name facebook/opt-2.7b\
+    --test_path ../inference_results/gpt2-xl/wikitext/contrastive/backup/contrastive_result.json
+exit
+
 methods=("resistance")
 # datasets=("story" "wikinews" "wikitext")
 datasets=("wikinews")

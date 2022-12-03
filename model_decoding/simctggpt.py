@@ -354,6 +354,7 @@ class SimCTGGPT(nn.Module):
                 generated[idx].append(t)
             if generated[0][-1] == end_of_sequence_token_id:
                 break
+            running_label.append(label)
         output = generated[0]
         if early_stop:
             tmp = []
@@ -366,7 +367,7 @@ class SimCTGGPT(nn.Module):
                     else:
                         break
             output = tmp
-        return output
+        return output, running_label
 
     def detailed_greedy_search(self, input_ids, decoding_len, end_of_sequence_token_id = None, early_stop = False, speedup=True):
         if early_stop:

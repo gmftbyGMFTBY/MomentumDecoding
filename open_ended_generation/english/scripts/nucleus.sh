@@ -14,10 +14,10 @@ topps=(0.4 0.5 0.6 0.7 0.8 0.9 0.95 1.0)
 for topp in ${topps[@]}
 do
     echo "========== Topp: $topp =========="
-    CUDA_VISIBLE_DEVICES=2 python ../inference.py\
+    CUDA_VISIBLE_DEVICES=5 python ../inference.py\
         --model_name gpt2-xl\
-        --data_path ../../../data/wikinews/wikinews.jsonl\
-        --data_name wikinews\
+        --data_path ../../../data/story/story.jsonl\
+        --data_name story\
         --decoding_method nucleus\
         --topp $topp\
         --number_of_instance_to_generate_per_method 1\

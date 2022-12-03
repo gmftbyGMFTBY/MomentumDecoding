@@ -15,8 +15,8 @@ do
     echo "========== Topk: $topk =========="
     CUDA_VISIBLE_DEVICES=4 python ../inference.py\
         --model_name gpt2-xl\
-        --data_path ../../../data/wikinews/wikinews.jsonl\
-        --data_name wikinews\
+        --data_path ../../../data/story/story.jsonl\
+        --data_name story\
         --decoding_method topk\
         --number_of_instance_to_generate_per_method 1\
         --topk $topk\

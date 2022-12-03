@@ -23,6 +23,8 @@ def load_result(in_f):
         one_prediction_list = []
         for item in result_list:
             one_prediction = item['generated_result'][str(idx)]
+            # evaluate reference
+            # one_prediction = item['reference_text']
             one_prediction_list.append(one_prediction)
         assert len(one_prediction_list) == len(reference_list)
         all_prediction_list.append(one_prediction_list)

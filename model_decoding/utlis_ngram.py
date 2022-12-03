@@ -98,10 +98,18 @@ def ResistanceDecodingNGram(
     scores = torch.stack(scores)
     _, index = scores.max(dim=-1)
     next_id = top_k_ids[0, index].reshape(1, 1)
-    if alphas[index] == 0:
-        is_greedy = True
+
+    # if index == 0:
+    #     is_greedy = True
+    # else:
+    #     is_greedy = False
+    if top_k_ids[0, 0].item() not in graph:
+        is_greedy = 0
     else:
-        is_greedy = False
+        if index == 0:
+            is_greedy = 1
+        else:
+            is_greedy = 2
 
     # update the graph
     if next_id.item() not in graph:

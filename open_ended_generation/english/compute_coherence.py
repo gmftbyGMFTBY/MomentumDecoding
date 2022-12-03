@@ -1,4 +1,5 @@
 import sys
+import ipdb
 import os
 import operator
 from operator import itemgetter
@@ -28,6 +29,8 @@ def load_result(in_f):
             one_prefix_text = item['prefix_text']
             one_prefix_text_list.append(one_prefix_text)
             one_prediction_list.append(one_prediction)
+            # evaluate the reference
+            # one_prediction_list.append(item['reference_text'])
         assert len(one_prefix_text_list) == len(one_prediction_list)
         all_prefix_text_list.append(one_prefix_text_list)
         all_prediction_list.append(one_prediction_list)

@@ -57,7 +57,8 @@ class Data:
             p.update(i)
             temp_token_id_list = []
             for idx in range(self.number_of_instance_to_generate_per_method):
-                temp_token_id_list.append(self.get_one_result(data[i]['generated_result'][str(idx)]))
+                # temp_token_id_list.append(self.get_one_result(data[i]['generated_result'][str(idx)]))
+                temp_token_id_list.append(self.get_one_result(data[i]['reference_text']))
             result_token_id_list.append(temp_token_id_list)
         p.finish()
         return result_token_id_list

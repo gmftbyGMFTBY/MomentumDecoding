@@ -3,7 +3,7 @@ import argparse
 
 def parse_config():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--f", type=str)
+    parser.add_argument("--f", type=str, default='MD_versus_CS.json')
     return parser.parse_args()
 
 def parse_num(num_1, num_2):

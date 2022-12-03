@@ -10,7 +10,7 @@ with open('wikitext/wikitext_contrastive_gpt2-xl_256.jsonl') as f:
         new_items = {
             'id': idx, 
             'ended': True,
-            'text': item['gold_ref'].strip('<|endoftext|>')
+            'text': item['gold_ref']
         }
         datasets.append(json.dumps(new_items))
 
