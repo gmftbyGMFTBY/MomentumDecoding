@@ -1,4 +1,4 @@
-from model_decoding import *
+from models import *
 import ipdb
 
 model = SimCTGGPT('gpt2-xl')

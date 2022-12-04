@@ -13,8 +13,7 @@ import time
 import logging
 import sys
 sys.path.append('../../../')
-from model_decoding import SimCTGGPT
-# from simctg.simctggpt import SimCTGGPT
+from models import SimCTGGPT
 
 import logging
 logging.getLogger('transformers.generation_utils').disabled = True
