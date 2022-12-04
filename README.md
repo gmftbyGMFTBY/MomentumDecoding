@@ -1,13 +1,9 @@
-# Contrastive Search Is What You Need For Neural Text Generation
-**Authors**: Yixuan Su and Nigel Collier
+# Momentum Decoding For Neural Text Generation
+**Authors**: Tian Lan and Yixuan Su
 
-**[Contact]** If you have any questions, feel free to contact me via (ys484 at cam.ac.uk).
+**[Contact]** If you have any questions, feel free to contact me via (lantiangmftby at gmail.com).
 
-This repository contains code other related resources of our paper ["Contrastive Search Is What You Need For Neural Text Generation"](https://arxiv.org/abs/2210.14140).
-
-:star2: Check out this awesome [[demo]](https://huggingface.co/spaces/joaogante/contrastive_search_generation) generously supported by Huggingface ([@huggingface](https://github.com/huggingface) :hugs:) which compares contrastive search with other popular decoding methods. Many thanks to Huggingface :hugs:! 
-
-In <a href='#install_transformers'>Section 2.1.</a>, we demonstrate how to use contrastive search in Huggingface `transformers`.
+This repository contains code other related resources of our paper ["Momentum Decoding: Open-ended Text Generation As Graph Exploration"](https://arxiv.org/abs/).
 
 ****
 If you find our paper and resources useful, please kindly leave a star and cite our papers. Thanks!
@@ -19,21 +15,7 @@ If you find our paper and resources useful, please kindly leave a star and cite 
   journal={arXiv preprint arXiv:2210.14140},
   year={2022}
 }
-
-@inproceedings{su2022a,
-  title={A Contrastive Framework for Neural Text Generation},
-  author={Yixuan Su and Tian Lan and Yan Wang and Dani Yogatama and Lingpeng Kong and Nigel Collier},
-  booktitle={Advances in Neural Information Processing Systems},
-  editor={Alice H. Oh and Alekh Agarwal and Danielle Belgrave and Kyunghyun Cho},
-  year={2022},
-  url={https://openreview.net/forum?id=V88BafmH9Pj}
-}
 ```
-
-****
-
-### News:
-* [2022/10/26] The paper "Contrastive Search Is What You Need For Neural Text Generation" is publicly released!
 
 ****
 
@@ -63,9 +45,15 @@ If you find our paper and resources useful, please kindly leave a star and cite 
 
 #### 1. Introduction: <a href='#all_catelogue'>[Back to Top]</a>
 
-Generating text with autoregressive language models (LMs) is of great importance to many natural language processing (NLP) applications. Previous solutions for this task often produce text that contains degenerative expressions or lacks semantic consistency. Recently, Su et al. introduced a new decoding method, contrastive search, based on the isotropic representation space of the language model and obtained new state of the art on various benchmarks. Additionally, Su et al. argued that the representations of autoregressive LMs (e.g. GPT-2) are intrinsically anisotropic which is also shared by previous study. Therefore, to ensure the language model follows an isotropic distribution, Su et al. proposed a contrastive learning scheme, SimCTG, which calibrates the language model's representations through additional training.
+Open-ended text generation with autoregressive language models (LMs) is an indispensable component in various NLP applications. Typical examples include dialogue systems , contextual text completion, story generation, etc.
 
-In this study, we first answer the question: _"Are autoregressive LMs really anisotropic?"_. To this end, we extensively evaluate the isotropy of LMs across 16 major languages. Surprisingly, we find that the anisotropic problem only exists in the two specific English GPT-2-small/medium models. On the other hand, all other evaluated LMs are naturally isotropic which is in contrast to the conclusion drawn by previous studies. Based on our finding, we further assess the contrastive search decoding method using off-the-shelf LMs on four generation tasks across 16 languages. Our experimental results demonstrate that contrastive search significantly outperforms previous decoding methods without any additional training. More notably, on 12 out of 16 evaluated languages, contrastive search performs comparably with human-level performances as judged by human evaluations.
+Conventional maximization-based methods for this task, such as greedy search and beam search, often lead to the degeneration problem, i.e. the generated text is unnatural and contains undesirable repetitions.
+Existing solutions for this problem can be divided into two categories: 
+(1) Stochastic methods, e.g. top-$k$ and nucleus sampling, introduce randomness to avoid undesirable repetitions. However, the intrinsic stochasticity of these sampling approaches often leads to semantic incoherence and topic drift in the generated text.
+(2) Deteriminstic method, i.e. contrastive search, relies on a one-step look-ahead mechanism to encourage diverse generations. While obtaining superior performances, such look-ahead operation demands extra computational overhead.
+
+In this study, we perceive open-ended text generation from a new perspective. Specifically, we view it as an exploration process within a directed graph.
+Therefore, it allows us to formulate the phenomenon of degeneration as circular loops within the directed graph. In this ![Figure](img/overview.png), we provide an illustration in which the LM generates text given a prefix of three tokens, i.e. [1,2,3], and gets stuck in the circular loops, i.e. repetitions, of [2,3,7,8]. Intuitively, such degeneration can be addressed if the tendency of the LM to stay in the circular loop can be _properly_ discouraged, therefore allowing the LM to jump out of the loop at the correct position and produce text with _natural_ repetitions. Based on this motivation, we propose a novel decoding method---_momentum decoding_---which encourages the LM to greedily explore new nodes outside the current graph. Meanwhile, it also allows the LM to return to the existing nodes but with a momentum downgraded by a pre-defined resistance function. 
 
 ****
 
