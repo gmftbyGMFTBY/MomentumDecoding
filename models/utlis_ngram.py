@@ -15,14 +15,25 @@ from math import *
 
 def ngram_lookup_table_ours(rep_len, mapping=None):
     if mapping is None:
+        # for GPT2-XL
         mapping = {
             0: 0.0,
             1: 1.0,    # no rersistance
             2: 3.0,
             3: 4.0,
             4: 5.0,
-            5: 6.0,
+            5: 5.0,
         }
+        # for IDEA-CCNL/Wenzhong2.0-GPT2-3.5B-chinese
+        # mapping = {
+        #     0: 0.0,
+        #     1: 1.0,    # no rersistance
+        #     # 2: 3.0,
+        #     2: 1.0,
+        #     3: 2.0,
+        #     4: 3.0,
+        #     5: 4.0,
+        # }
     if rep_len in mapping:
         return mapping[rep_len]
     else:

@@ -1,12 +1,17 @@
 from models import SimCTGGPT
 import ipdb
 
-# model = SimCTGGPT('uer/gpt2-chinese-cluecorpussmall')
-model = SimCTGGPT('IDEA-CCNL/Wenzhong2.0-GPT2-3.5B-chinese')
+# chinese example
+# model = SimCTGGPT('IDEA-CCNL/Wenzhong2.0-GPT2-3.5B-chinese')
+# model.eval().cuda()
+# tokenizer = model.tokenizer
+# eos_token_id = tokenizer.eos_token_id
+
+# english example
+model = SimCTGGPT('gpt2-large')
 model.eval().cuda()
 tokenizer = model.tokenizer
 eos_token_id = tokenizer.eos_token_id
-# eos_token_id = tokenizer.sep_token_id
 
 while True:
     prefix = input('Prefix >>> ')
@@ -20,7 +25,6 @@ while True:
         early_stop=True, 
         resistance_function='ours'
     )
-    # response = ''.join(tokenizer.convert_ids_to_tokens(output))
     response = tokenizer.decode(output)
     print('[Momentum Decoding]', response)
     print('=' * 50)
@@ -34,7 +38,6 @@ while True:
         end_of_sequence_token_id=eos_token_id,
         early_stop=True
     )
-    # response = ''.join(tokenizer.convert_ids_to_tokens(output))
     response = tokenizer.decode(output)
     print('[Contrastive Search]', response)
     print('=' * 50)
