@@ -24,10 +24,7 @@ If you find our paper and resources useful, please kindly leave a star and cite 
 ### Catalogue:
 * <a href='#introduction'>1. Introduction</a>
 * <a href='#inference on benchmarks'>2. Inference on benchmarks</a>
-* <a href='#LMs_isotropy'>3. Measuring Isotropy of LMs</a>
-* <a href='#open_ended_text_generation'>4. Open-ended Text Generation</a>
-* <a href='#code_generation'>5. Code Generation</a>
-* <a href='#machine_translation'>6. Machine Translation</a>
+* <a href='#test with prefix'>3. Test with prefix</a>
     
 ****
 
@@ -180,55 +177,24 @@ CUDA_VISIBLE_DEVICES=6 python ../compute_greedy_ratio.py \
 
 ****
 
-<span id='LMs_isotropy'/>
+<span id='test with prefix'/>
 
-##### 3. Measuring Isotropy of LMs: <a href='#all_catelogue'>[Back to Top]</a>
+##### 3. Test with prefix: <a href='#all_catelogue'>[Back to Top]</a>
 
-The detailed tutorial on measuring the isotropy of LMs is provided [[here]](./isotropy_analysis/).
+In this example, you will test the Chinese language model [IDEA-CCNL/Wenzhong2.0-GPT2-3.5B-chinese](https://huggingface.co/IDEA-CCNL/Wenzhong2.0-GPT2-3.5B-chinese) with your input after `Prefix >>>`.
+If you want to change the langauge model in `test.py`, feel free to change this few lines to load your LMs:
 
-**[Note]** To replicate our experimental results, please make sure you have installed the environment as
-```yaml
-pip install simctg --upgrade
+```python
+# Change the name in the huggingface models
+model = SimCTGGPT('IDEA-CCNL/Wenzhong2.0-GPT2-3.5B-chinese')
+model.eval().cuda()
+tokenizer = model.tokenizer
+# Note, some LMs doesn't have the `eos_token_id`, otherwise the `sep_token_id`
+eos_token_id = tokenizer.eos_token_id
 ```
 
+This example allows you to input your prefix and generate maximum of 512 tokens or achieves the `eos_token_id`.
 
-****
-
-<span id='open_ended_text_generation'/>
-
-##### 4. Open-ended Text Generation: <a href='#all_catelogue'>[Back to Top]</a>
-
-The detailed tutorial on the experiments of open-ended text generation is provided [[here]](./open_ended_generation/).
-
-**[Note]** To replicate our experimental results, please make sure you have installed the environment as
-```yaml
-pip install simctg --upgrade
+```bash
+./test.sh
 ```
-
-****
-
-<span id='code_generation'/>
-
-##### 5. Code Generation: <a href='#all_catelogue'>[Back to Top]</a>
-
-The detailed tutorial on the experiments of code generation is provided [[here]](./code_generation/).
-
-**[Note]** To replicate our experimental results, please make sure you have installed the environment as
-```yaml
-pip install simctg --upgrade
-```
-
-****
-
-<span id='machine_translation'/>
-
-##### 6. Machine Translation: <a href='#all_catelogue'>[Back to Top]</a>
-
-The detailed tutorial on the experiments of machine translation is provided [[here]](./translation/).
-
-**[Note]** To replicate our experimental results, please make sure you have installed the environment as
-```yaml
-pip install simctg --upgrade
-```
-
-
