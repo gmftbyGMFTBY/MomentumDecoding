@@ -42,7 +42,7 @@ Existing solutions for this problem can be divided into two categories:
 In this study, we perceive open-ended text generation from a new perspective. Specifically, we view it as an exploration process within a directed graph.
 Therefore, it allows us to formulate the phenomenon of degeneration as circular loops within the directed graph. In the following figure, we provide an illustration in which the LM generates text given a prefix of three tokens, i.e. [1,2,3], and gets stuck in the circular loops, i.e. repetitions, of [2,3,7,8]. Intuitively, such degeneration can be addressed if the tendency of the LM to stay in the circular loop can be _properly_ discouraged, therefore allowing the LM to jump out of the loop at the correct position and produce text with _natural_ repetitions. Based on this motivation, we propose a novel decoding method---_momentum decoding_---which encourages the LM to greedily explore new nodes outside the current graph. Meanwhile, it also allows the LM to return to the existing nodes but with a momentum downgraded by a pre-defined resistance function. 
 
-<img src="./overview.png" width = "350" height = "200" alt="overview" align=center />
+<img src="./img/overview.png" width = "350" height = "200" alt="overview" align=center />
 
 Three benchmarks are used in this paper, which are listed under `data` folder (`wikitext`, `wikinews`, `story`).
 
