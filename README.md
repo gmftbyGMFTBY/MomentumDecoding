@@ -1,5 +1,5 @@
 # Momentum Decoding For Neural Text Generation
-**Authors**: Tian Lan and Yixuan Su
+**Authors**: Tian Lan, Yixuan Su, and Shuhang Liu
 
 **[Contact]** If you have any questions, feel free to contact me via (lantiangmftby at gmail.com).
 
@@ -36,7 +36,7 @@ Open-ended text generation with autoregressive language models (LMs) is an indis
 
 Conventional maximization-based methods for this task, such as greedy search and beam search, often lead to the degeneration problem, i.e. the generated text is unnatural and contains undesirable repetitions.
 Existing solutions for this problem can be divided into two categories: 
-(1) Stochastic methods, e.g. top-$k$ and nucleus sampling, introduce randomness to avoid undesirable repetitions. However, the intrinsic stochasticity of these sampling approaches often leads to semantic incoherence and topic drift in the generated text.
+(1) Stochastic methods, e.g. top-k and nucleus sampling, introduce randomness to avoid undesirable repetitions. However, the intrinsic stochasticity of these sampling approaches often leads to semantic incoherence and topic drift in the generated text.
 (2) Deteriminstic method, i.e. contrastive search, relies on a one-step look-ahead mechanism to encourage diverse generations. While obtaining superior performances, such look-ahead operation demands extra computational overhead.
 
 In this study, we perceive open-ended text generation from a new perspective. Specifically, we view it as an exploration process within a directed graph.
@@ -62,7 +62,7 @@ pip install -r requirments.txt
 ##### 2. get into the folder
 
 ```bash
-cd open_ended_generation/english
+cd open_ended_generation/english/scripts
 ```
 
 ##### 3. running baselines
