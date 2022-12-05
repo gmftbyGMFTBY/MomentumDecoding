@@ -198,3 +198,38 @@ This example allows you to input your prefix and generate maximum of 512 tokens 
 ```bash
 ./test.sh
 ```
+
+In this chinese example, if the input prefix is `腾讯是一家`, the momentum decoding and contrastive search will generate the following results:
+
+```text
+Prefix >>> 腾讯是一家
+[Momentum Decoding] 腾讯是一家非常有活力的公司，我们在移动互联网上也有很多创新，这些创新都是基于对用户需求的深刻理解。” 另外，腾讯还表示，将会与合作伙伴一起，把更多的创新应用带给用户，并通过开放、协作的方式，与更多合作伙伴共同推动中国互联网的发展。
+==================================================
+[Contrastive Search] 腾讯是一家以互联网为基础的科技与文化公司，专注于移动互联网与社交网络的产品研发与运营。腾讯的使命是“让互联网生活更简单” ，希望通过开放合作的态度来构建一个创新、开放的平台，为各行各业创造价值。 公司简介 腾讯是一家以互联网为基础的科技与文化公司，专注于移动互联网与社交网络的产品研发与运营。腾讯的使命是“让互联网生活更简单” ，希望通过开放合作的态度来构建一个创新、开放的平台，为各行各业创造价值 。 [1] 业务介绍 腾讯拥有国内最大的互联网综合服务平台和行业领先的互联网应用，旗下拥有QQ、
+==================================================
+```
+Note that in this case, the resistance function of momentum decoding is a little bit different from the definition in our paper, the details can be found in the function `` of `models/utils_ngram.py`. This modification is made for this Chinese langauge model, the new langauge models could benefit from the careful definition of resistance function. The resistance function in our paper is made for the English [GPT-XL model](https://huggingface.co/gpt2-xl).
+
+If your test the famous English [gpt2-large](https://huggingface.co/gpt2-large) model, given the prefix `DeepMind Company is`, the generated results of momentum decoding and contrastive search will be:
+
+```text
+Prefix >>> DeepMind Company is
+[Momentum Decoding] DeepMind Company is a leading AI research company, with over $1.5 billion in funding from investors including Google, Microsoft, and Facebook.
+
+The company's DeepMind AlphaGo program beat the world champion of Go, Lee Sedol, by beating him 6-3 in a match that lasted more than three hours. The game was played on Sunday at the end of a two-day tournament in Seoul.
+
+"We are very proud of our team's achievement," said DeepMind CEO Demis Hassabis. "This is an important step forward for artificial intelligence and we look forward to continuing to work with other companies to develop new technologies."
+
+In addition to its DeepMind subsidiary, DeepMind also has a number of other businesses, including a robotics division, a cloud computing division, and a deep learning startup.
+==================================================
+[Contrastive Search] DeepMind Company is a leader in artificial intelligence (AI). We have a long history of working with big data, machine learning, deep learning and other areas that have the potential to revolutionize the way we live, work and play.
+
+As part of our mission, we are committed to the open source community and encourage everyone to contribute to our code, research and development. This is the best way to ensure that AI is advancing at breakneck speed and that the benefits of AI are widely shared.
+
+In the past year and a half, we have made significant progress in the areas of AI and machine learning. Our research team has published over 1,000 papers in AI and machine learning journals, and more than 100 of these papers have been accepted for publication in peer-reviewed journals. This progress has been driven by an active and engaged community of researchers, and the support of thousands of contributors who have helped us build this community over the past year and a half.
+
+We believe that AI is going to play a critical role in our future, and it is our responsibility to make sure that it is well-funded, well-staffed and well-funded in every way possible. That's why we are investing in research and development, and in our community, to accelerate the pace of AI development and adoption.
+
+The OpenAI Foundation was founded in 2014 by Elon Musk, Reid Hoffman, Peter Norvig of Google DeepMind, Ilya Sutskever of Facebook AI Research, Chris Ferrucci of Microsoft Research, Yann LeCun of the University of Montreal (Canada), Andrew Ng of Nanyang Technological University (Singapore), and a group of like-minded individuals. The goal of the OAF is to provide a home for AI-related philanthropy and open source software that is free of charge to the public, and to foster the development of AI and machine learning technologies for the benefit of humanity. For more information, visit openai.org.
+==================================================
+```
