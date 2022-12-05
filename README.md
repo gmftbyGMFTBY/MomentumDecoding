@@ -51,6 +51,8 @@ Three benchmarks are used in this paper, which are listed under `data` folder (`
 
 <span id='inference on benchmarks'/>
 
+#### 2. Inference on benchmarks: <a href='#all_catelogue'>[Back to Top]</a>
+
 ##### 1. prepare the environment
 
 ```bash
@@ -179,7 +181,7 @@ CUDA_VISIBLE_DEVICES=6 python ../compute_greedy_ratio.py \
 
 <span id='test with prefix'/>
 
-##### 3. Test with prefix: <a href='#all_catelogue'>[Back to Top]</a>
+#### 3. Test with prefix: <a href='#all_catelogue'>[Back to Top]</a>
 
 In this example, you will test the Chinese language model [IDEA-CCNL/Wenzhong2.0-GPT2-3.5B-chinese](https://huggingface.co/IDEA-CCNL/Wenzhong2.0-GPT2-3.5B-chinese) with your input after `Prefix >>>`.
 If you want to change the langauge model in `test.py`, feel free to change this few lines to load your LMs:
