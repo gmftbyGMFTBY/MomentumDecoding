@@ -3,7 +3,7 @@
 
 **[Contact]** If you have any questions, feel free to contact me via (lantiangmftby at gmail.com).
 
-This repository contains code other related resources of our paper ["Momentum Decoding: Open-ended Text Generation As Graph Exploration"](https://arxiv.org/abs/).
+This repository contains code other related resources of our paper ["Momentum Decoding: Open-ended Text Generation As Graph Exploration"](https://arxiv.org/pdf/2212.02175.pdf).
 
 ****
 If you find our paper and resources useful, please kindly leave a star and cite our papers. Thanks!
