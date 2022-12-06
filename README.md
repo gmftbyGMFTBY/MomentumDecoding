@@ -9,12 +9,7 @@ This repository contains code other related resources of our paper ["Momentum De
 If you find our paper and resources useful, please kindly leave a star and cite our papers. Thanks!
 
 ```bibtex
-@article{su2022contrastiveiswhatyouneed,
-  title={Contrastive Search Is What You Need For Neural Text Generation},
-  author={Yixuan Su and Nigel Collier},
-  journal={arXiv preprint arXiv:2210.14140},
-  year={2022}
-}
+Lan, T., Su, Y., Liu, S., Huang, H., & Mao, X. (2022). Momentum Decoding: Open-ended Text Generation As Graph Exploration. arXiv. https://doi.org/10.48550/arXiv.2212.02175
 ```
 
 ****
