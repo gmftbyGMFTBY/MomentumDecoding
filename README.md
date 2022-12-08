@@ -9,7 +9,11 @@ This repository contains code other related resources of our paper ["Momentum De
 If you find our paper and resources useful, please kindly leave a star and cite our papers. Thanks!
 
 ```bibtex
-Lan, T., Su, Y., Liu, S., Huang, H., & Mao, X. (2022). Momentum Decoding: Open-ended Text Generation As Graph Exploration. arXiv. https://doi.org/10.48550/arXiv.2212.02175
+@inproceedings{Lan2022MomentumDO,
+  title={Momentum Decoding: Open-ended Text Generation As Graph Exploration},
+  author={Tian Lan and Yixuan Su and Shuhang Liu and Heyan Huang and Xian-Ling Mao},
+  year={2022}
+}
 ```
 
 ****
