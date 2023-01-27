@@ -7,7 +7,8 @@
 #     --decoding_len 256\
 #     --save_path_prefix ../inference_results/
 
-topks=(2 3 4 6 7 8 9 10)
+# 2000 for 4-gram block
+topks=(2000)
 for topk in ${topks[@]}
 do
     echo "========== Topk: $topk =========="

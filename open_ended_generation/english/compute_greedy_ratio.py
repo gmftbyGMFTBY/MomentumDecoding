@@ -57,8 +57,8 @@ class Data:
             p.update(i)
             temp_token_id_list = []
             for idx in range(self.number_of_instance_to_generate_per_method):
-                # temp_token_id_list.append(self.get_one_result(data[i]['generated_result'][str(idx)]))
-                temp_token_id_list.append(self.get_one_result(data[i]['reference_text']))
+                temp_token_id_list.append(self.get_one_result(data[i]['generated_result'][str(idx)]))
+                # temp_token_id_list.append(self.get_one_result(data[i]['reference_text']))
             result_token_id_list.append(temp_token_id_list)
         p.finish()
         return result_token_id_list
@@ -128,9 +128,11 @@ if __name__ == '__main__':
 
     args = parse_config()
     
-    save_path = f"../inference_results/{args.model_name}/{args.data_name}/{args.decoding_method}/{args.decoding_method}_greedy_ratio_result.json".format(args.decoding_method)
-    test_path = f"../inference_results/{args.model_name}/{args.data_name}/{args.decoding_method}/{args.decoding_method}_result.json"
+    save_path = f"../inference_results/{args.model_name}/{args.data_name}/{args.decoding_method}/{args.decoding_method}_greedy_ratio_result.json"
+    # test_path = f"../inference_results/{args.model_name}/{args.data_name}/{args.decoding_method}/{args.decoding_method}_result_1000.json"
+    test_path = f"../inference_results/{args.model_name}/{args.data_name}/{args.decoding_method}/{args.decoding_method}_result_5_3_gram_block.json"
     print ('evaluation save name is {}'.format(save_path))
+    print('evaluation file name is', test_path)
 
     print ('Model loading...')
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)

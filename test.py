@@ -8,7 +8,7 @@ import ipdb
 # eos_token_id = tokenizer.eos_token_id
 
 # english example
-model = SimCTGGPT('gpt2-large')
+model = SimCTGGPT('gpt2-xl')
 model.eval().cuda()
 tokenizer = model.tokenizer
 eos_token_id = tokenizer.eos_token_id

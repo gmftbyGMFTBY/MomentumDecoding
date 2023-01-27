@@ -1,6 +1,6 @@
 CUDA_VISIBLE_DEVICES=1 python ../compute_coherence.py\
     --opt_model_name facebook/opt-2.7b\
-    --test_path ../inference_results/gpt2-xl/wikitext/contrastive/backup/contrastive_result.json
+    --test_path ../inference_results/gpt2-xl/story/resistance/resistance_result_2000.json
 exit
 
 methods=("resistance")
