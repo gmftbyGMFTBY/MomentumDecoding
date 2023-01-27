@@ -1,18 +1,17 @@
 # Momentum Decoding For Neural Text Generation
-**Authors**: Tian Lan and Yixuan Su
+**Authors**: Tian Lan, Yixuan Su, and Shuhang Liu
 
 **[Contact]** If you have any questions, feel free to contact me via (lantiangmftby at gmail.com).
 
-This repository contains code other related resources of our paper ["Momentum Decoding: Open-ended Text Generation As Graph Exploration"](https://arxiv.org/abs/).
+This repository contains code other related resources of our paper ["Momentum Decoding: Open-ended Text Generation As Graph Exploration"](https://arxiv.org/pdf/2212.02175.pdf).
 
 ****
 If you find our paper and resources useful, please kindly leave a star and cite our papers. Thanks!
 
 ```bibtex
-@article{su2022contrastiveiswhatyouneed,
-  title={Contrastive Search Is What You Need For Neural Text Generation},
-  author={Yixuan Su and Nigel Collier},
-  journal={arXiv preprint arXiv:2210.14140},
+@inproceedings{Lan2022MomentumDO,
+  title={Momentum Decoding: Open-ended Text Generation As Graph Exploration},
+  author={Tian Lan and Yixuan Su and Shuhang Liu and Heyan Huang and Xian-Ling Mao},
   year={2022}
 }
 ```
@@ -36,7 +35,7 @@ Open-ended text generation with autoregressive language models (LMs) is an indis
 
 Conventional maximization-based methods for this task, such as greedy search and beam search, often lead to the degeneration problem, i.e. the generated text is unnatural and contains undesirable repetitions.
 Existing solutions for this problem can be divided into two categories: 
-(1) Stochastic methods, e.g. top-$k$ and nucleus sampling, introduce randomness to avoid undesirable repetitions. However, the intrinsic stochasticity of these sampling approaches often leads to semantic incoherence and topic drift in the generated text.
+(1) Stochastic methods, e.g. top-k and nucleus sampling, introduce randomness to avoid undesirable repetitions. However, the intrinsic stochasticity of these sampling approaches often leads to semantic incoherence and topic drift in the generated text.
 (2) Deteriminstic method, i.e. contrastive search, relies on a one-step look-ahead mechanism to encourage diverse generations. While obtaining superior performances, such look-ahead operation demands extra computational overhead.
 
 In this study, we perceive open-ended text generation from a new perspective. Specifically, we view it as an exploration process within a directed graph.
@@ -51,6 +50,8 @@ Three benchmarks are used in this paper, which are listed under `data` folder (`
 
 <span id='inference on benchmarks'/>
 
+#### 2. Inference on benchmarks: <a href='#all_catelogue'>[Back to Top]</a>
+
 ##### 1. prepare the environment
 
 ```bash
@@ -60,7 +61,7 @@ pip install -r requirments.txt
 ##### 2. get into the folder
 
 ```bash
-cd open_ended_generation/english
+cd open_ended_generation/english/scripts
 ```
 
 ##### 3. running baselines
@@ -179,7 +180,7 @@ CUDA_VISIBLE_DEVICES=6 python ../compute_greedy_ratio.py \
 
 <span id='test with prefix'/>
 
-##### 3. Test with prefix: <a href='#all_catelogue'>[Back to Top]</a>
+#### 3. Test with prefix: <a href='#all_catelogue'>[Back to Top]</a>
 
 In this example, you will test the Chinese language model [IDEA-CCNL/Wenzhong2.0-GPT2-3.5B-chinese](https://huggingface.co/IDEA-CCNL/Wenzhong2.0-GPT2-3.5B-chinese) with your input after `Prefix >>>`.
 If you want to change the langauge model in `test.py`, feel free to change this few lines to load your LMs:
